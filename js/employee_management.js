@@ -1,5 +1,4 @@
 
-        
         // Function to display error messages on the page
         function displayError(errorMessage) {
             const errorContainer = document.getElementById("errorContainer");
