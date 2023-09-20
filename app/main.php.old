@@ -1,0 +1,92 @@
+<?php
+$host = "localhost:3306";
+$username = "employee_db_user";
+$password = "M1o3*h2p7";
+$db_name = "employee_db";
+
+// Create a mysqli connection
+$link = mysqli_connect($host, $username, $password, $db_name);
+
+// Check the connection
+if (!$link) {
+    die("Database connection failed: " . mysqli_connect_error());
+}
+
+// Fetch all employees from the database
+$employees = array();
+$result = mysqli_query($link, "SELECT * FROM employees");
+while ($row = mysqli_fetch_assoc($result)) {
+    $employees[] = $row;
+}
+
+// Insert a new employee into the database
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["first_name"]) && isset($_POST["last_name"]) && isset($_POST["email"]) && isset($_POST["employee_id"])) {
+    $first_name = $_POST["first_name"];
+    $last_name = $_POST["last_name"];
+    $email = $_POST["email"];
+    $employee_id = $_POST["employee_id"];
+    $query = "INSERT INTO employees (first_name, last_name, email, employee_id) VALUES ('$first_name', '$last_name', '$email', '$employee_id')";
+    $insert_result = mysqli_query($link, $query);
+    if (!$insert_result) {
+        die("Insert failed: " . mysqli_error($link));
+    }
+}
+
+// Update employee information
+// if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["submit_update"])) {
+//     $update_employee_id = $_POST["update_employee_id"];
+//     $update_first_name = $_POST["update_first_name"];
+//     $update_last_name = $_POST["update_last_name"];
+//     $update_email = $_POST["update_email"];
+//     $query = "UPDATE employees SET first_name = '$update_first_name', last_name = '$update_last_name', email = '$update_email' WHERE employee_id = '$update_employee_id'";
+//     $update_result = mysqli_query($link, $query);
+//     if (!$update_result) {
+//         die("Update failed: " . mysqli_error($link));
+//     }
+// }
+
+//Update employee information
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["submit_update"])) {
+    $update_employee_id = $_POST["update_employee_id"];
+    $update_first_name = $_POST["update_first_name"];
+    $update_last_name = $_POST["update_last_name"];
+    $update_email = $_POST["update_email"];
+
+    // Check if the employee with the given employee_id exists
+    $check_query = "SELECT * FROM employees WHERE employee_id = '$update_employee_id'";
+    $check_result = mysqli_query($link, $check_query);
+
+    if (mysqli_num_rows($check_result) == 0) {
+        die("Error: Employee with ID $update_employee_id does not exist.");
+    } else {
+        // Perform the update
+        $query = "UPDATE employees SET first_name = '$update_first_name', last_name = '$update_last_name', email = '$update_email' WHERE employee_id = '$update_employee_id'";
+        $update_result = mysqli_query($link, $query);
+
+        if (!$update_result) {
+            die("Update failed: " . mysqli_error($link));
+        }
+    }
+}
+
+
+
+// Fetch all employees from the database (including the updated data)
+$employees = array();
+$result = mysqli_query($link, "SELECT * FROM employees");
+while ($row = mysqli_fetch_assoc($result)) {
+    $employees[] = $row;
+}
+
+
+// Search for employees by first name or last name
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search_name"])) {
+    $search_name = $_POST["search_name"];
+    $query = "SELECT * FROM employees WHERE first_name LIKE '%$search_name%' OR last_name LIKE '%$search_name%'";
+    $search_result = mysqli_query($link, $query);
+    $search_employees = array();
+    while ($row = mysqli_fetch_assoc($search_result)) {
+        $search_employees[] = $row;
+    }
+}
+?>
